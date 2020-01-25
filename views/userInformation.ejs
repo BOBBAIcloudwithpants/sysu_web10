@@ -1,0 +1,86 @@
+<html>
+
+<head>
+  <link rel="stylesheet" type="text/css" href="stylesheets/userInformation.css" />
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/userInformation.js"></script>
+</head>
+
+<body>
+
+  <div id="positioner">
+    <div id="border">
+    </div>
+    <div id="title">
+      User Information
+    </div>
+    <div class="information" id="username">Username: <span id="w_username"><%= username %></span></div><br />
+    <div class="information" id="studentID">StudentID: <span id="w_stu"><%= studentID %></span></div><br />
+    <div class="information" id="phone">Phone: <span id="w_phone"><%= phone %></span></div><br />
+    <div class="information" id="email">Email: <span id="w_email"><%= email %></span></div>
+    <div id="pos">
+      <button id="resignin">退出登录</button>
+      <button id="register">重新注册</button>
+    </div>
+  </div>
+
+  <script>
+    function getCookie(c_name) {
+      console.log(document.cookie);
+      if (unescape(document.cookie).length > 0) {
+        var c_start = unescape(document.cookie).indexOf(c_name + "=")
+        var devide = unescape(document.cookie).split(";");
+        for (let i = 0; i < devide.length; i++) {
+          if (devide[i].indexOf(c_name + "=") != -1) {
+            var temp = devide[i].split("=");
+            return temp[1];
+          }
+        }
+      }
+      return ""
+    }
+    window.onload = () => {
+      var pre_user = '<%=username%>';
+      var user = getCookie("username");
+      var token = getCookie("token");
+      if (pre_user == user) {
+        $.ajax({
+          type: "GET",
+          url: '/verify',
+          async: false,
+          dataType: "text",
+          headers: { 'Content-type': 'application/json;charset=utf8', 'token': token },
+          success(data) {
+            data = $.parseJSON(data)
+            document.getElementById("w_stu").innerHTML = data.studentID;
+            document.getElementById("w_phone").innerHTML = data.phone;
+            document.getElementById("w_email").innerHTML = data.email;
+          },
+          error(xhr, e, r) {
+            alert("Sorry, your token is out of date, please login again.");
+            window.location.href = `/signin`;
+
+          }
+
+        })
+      } else {
+        alert("You can't access to other users' information");
+        window.location.href = `/signin`;
+      }
+
+      $("#resignin").click(function () {
+        delCookie("token");
+        delCookie("username");
+        window.location.href = `/signin`;
+      })
+
+      $("#register").click(function () {
+        delCookie("token");
+        delCookie("username");
+        window.location.href = `/regist`;
+      })
+    }
+  </script>
+</body>
+
+</html>
